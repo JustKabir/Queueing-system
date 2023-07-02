@@ -43,7 +43,7 @@ exports.generateToken_post = async(req, res)=>{
             ip: req.ip,
             tokenNo:lastTokenNo + 1
         });
-        return res.status(200).json({success:true, message:""})
+        return res.status(200).json({success:true, message:`Your Token No is: ${lastTokenNo +1}`, tokenNo:lastTokenNo+1})
 
     } catch (error) {
         console.warn(error);
@@ -51,6 +51,7 @@ exports.generateToken_post = async(req, res)=>{
     }
 }
 
+// Fetch default page data
 exports.defaultPage_get = async(req,res)=>{
     try {
         //check if the orgId exists
@@ -85,6 +86,21 @@ exports.defaultPage_get = async(req,res)=>{
         defaultPageData['tokenNo'] = userToken.tokenNo        
         return res.status(200).json({success: true, data:defaultPageData})
 
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({success:false, message:"Something went wrong, Please try again later"})
+    }
+}
+
+// Exit queue
+exports.exitQueue_delete = async(req,res)=>{
+    try {
+        // check if the user with the same ip address exists
+        const user = await Models.User.findOne({where:{ip:req.ip}});
+        if(!user)return res.status(404).json({success:false, message:"You haven't generated a token yet"});
+        //delete the queue
+        await Models.User.destroy({where:{ip:req.ip}});
+        return res.status(200).json({success:true, message:"You have successfully exited from the queue"});
     } catch (error) {
         console.error(error);
         return res.status(500).json({success:false, message:"Something went wrong, Please try again later"})

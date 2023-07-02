@@ -11,5 +11,5 @@ const userController = require('../controllers/userController');
 // User Login
 router.get('/home/:orgId', userController.defaultPage_get);
 router.post('/home/:orgId/generatetoken', userController.generateToken_post);
-
+router.delete('/home/:orgId/exitqueue', userController.exitQueue_delete);
 module.exports = router;
