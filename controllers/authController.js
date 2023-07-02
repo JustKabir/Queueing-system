@@ -17,7 +17,7 @@ exports.organizationLogin_post = async(req, res)=>{
         // verifying password
         if (organization && await bcrypt.compare(req.body.password, organization.password)) {
             const key = process.env.ACCESS_TOKEN_SECRET;
-            const accessToken = jwt.sign({organization:organization.email}, key,{
+            const accessToken = jwt.sign({email:organization.email}, key,{
                 expiresIn: '30d'
             });
              delete organization.dataValues['password'];

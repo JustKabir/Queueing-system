@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      organization.hasMany(models.User, {
+        foreignKey:'orgId',
+        as: 'users'
+      });
     }
   }
   organization.init({
@@ -77,6 +80,11 @@ module.exports = (sequelize, DataTypes) => {
     password:{
       type: DataTypes.STRING,
       allowNull: false
+    },
+    currentTokenNo:{
+      type: DataTypes.INTEGER,
+      allowNull:false,
+      defaultValue: 0
     }
   }, {
     sequelize,

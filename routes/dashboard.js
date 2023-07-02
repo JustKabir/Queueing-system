@@ -2,15 +2,15 @@ const express = require('express');
 const router = express.Router();
 
 // Controller
-const authController = require('../controllers/dashboardController');
+const dashboardController = require('../controllers/dashboardController');
 
 // Middleware
-const {userRegisterValidation,userLoginValidation} = require('../joiValidation/auth')
-const loginRequired = require('../middlewares/loginRequired')
+const loginRequired = require('../middlewares/loginRequired');
+const {organizationDetailsPatch} = require('../joiValidation/organization');
 
 
 // User Login
-router.post('/login',userLoginValidation, authController.organizationLogin_post);
-router.post('/register', userRegisterValidation, authController.organizationRegister_post);
+router.patch('/edit',loginRequired,organizationDetailsPatch, dashboardController.editDetails_patch);
+router.get('/', loginRequired, dashboardController.dashboard_get);
 
 module.exports = router;

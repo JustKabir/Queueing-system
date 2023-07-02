@@ -17,9 +17,13 @@ if(process.env.NODE_ENV !== 'production'){
   
   // Routes
   const authRoutes = require('./routes/auth');
+  const dashboardRoutes = require('./routes/dashboard');
+  const userRoutes = require('./routes/user');
 
   // Routes Middleware
   app.use('/api/auth',authRoutes );
+  app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/user', userRoutes);
   
   
   // Server Init
