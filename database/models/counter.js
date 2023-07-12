@@ -3,36 +3,31 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class organization extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+  class Counter extends Model {
+    
     static associate(models) {
-      organization.hasMany(models.User, {
+      Counter.belongsTo(models.Admin,{
+        foreignKey: 'adminId',
+        as:'counters'
+      })
+      Counter.hasMany(models.User, {
         foreignKey:'orgId',
         as: 'users'
       });
     }
   }
-  organization.init({
+  Counter.init({
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
     address: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     type: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull:true
     },
     description: {
       type: DataTypes.STRING,
@@ -40,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     helpDeskNo: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     gpsLocation: {
       type: DataTypes.STRING,
@@ -52,11 +47,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     openingTime: {
       type: DataTypes.DATE,
-      allowNull:false
+      allowNull:true
     },
     closingTime: {
       type: DataTypes.DATE,
-      allowNull:false
+      allowNull:true
     },
     startBreakTime: {
       type: DataTypes.DATE,
@@ -77,18 +72,21 @@ module.exports = (sequelize, DataTypes) => {
     approxTimeInMinutes:{
       type:DataTypes.INTEGER
     },
-    password:{
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     currentTokenNo:{
       type: DataTypes.INTEGER,
       allowNull:false,
       defaultValue: 0
+    },
+    adminId:{
+      type: DataTypes.INTEGER,
+      allowNull:false
+    },
+    url:{
+      type: DataTypes.STRING
     }
   }, {
     sequelize,
-    modelName: 'organization',
+    modelName: 'Counter',
   });
-  return organization;
+  return Counter;
 };

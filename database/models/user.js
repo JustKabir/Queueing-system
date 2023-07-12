@@ -10,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      User.belongsTo(models.organization, {
-        foreignKey: 'orgId',
-        as: 'organization'
+      User.belongsTo(models.Counter, {
+        foreignKey: 'counterId',
+        as: 'counter'
       });
     }
   }
   User.init({
-    orgId: {
+    counterId: {
       type: DataTypes.INTEGER,
       allowNull: false
     },

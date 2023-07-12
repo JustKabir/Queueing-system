@@ -2,11 +2,41 @@ const Models = require('../database/models');
 const { Op } = require("sequelize");
 
 
-// Edit Organization Details
+// Create counter
+exports.createCounter_post = async(req,res)=>{
+    try {
+        const admin  = await Models.Admin.findOne({where:{email: req.email},attributes:['id']})
+        await Models.Counter.create({
+            adminId:admin.id,
+            name:req.body.name,
+            address:req.body.address,
+            type: req.body.type,
+            description: req.body.description,
+            helpDeskNo: req.body.helpDeskNo,
+            openingTime:req.body.openingTime,
+            closingTime: req.body.closingTime,
+            startBreakTime: req.body.startBreakTime,
+            endBreakTime:req.body.endBreakTime,
+            approxTimeInHours:req.body.approxTimeInHours,
+            approxTimeInMinutes: req.body.approxTimeInMinutes
+        })
+        return res.json({success:true})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success: false, message:`Something went wrong, Please try again later`});
+    }
+}
+
+// Edit counter Details
 exports.editDetails_patch = async(req, res)=>{
     try {
+        // fetching admin's ID
+        const admin = await Models.Admin.findOne({
+            where:{email:req.email},
+            attributes:['id']
+        })
         // update it to the user
-        await Models.organization.update(req.body, {where:{email:req.email}});
+        await Models.Counter.update(req.body, {where:{adminId:admin.id}});
         return res.status(200).json({success:true, message:"You have successfully updated the details"})
     } catch (error) {
         console.log(error);

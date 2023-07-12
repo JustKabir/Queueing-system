@@ -6,12 +6,13 @@ const dashboardController = require('../controllers/dashboardController');
 
 // Middleware
 const loginRequired = require('../middlewares/loginRequired');
-const {organizationDetailsPatch} = require('../joiValidation/organization');
+const {counterDetailsPatch, createCounter} = require('../joiValidation/counter');
 
 
 // User Login
 router.get('/', loginRequired, dashboardController.dashboard_get);
-router.patch('/edit',loginRequired,organizationDetailsPatch, dashboardController.editDetails_patch);
-router.patch('/nexttoken',loginRequired, dashboardController.nextToken_patch);
+router.patch('/:counterId/edit',loginRequired,counterDetailsPatch, dashboardController.editDetails_patch);
+router.patch('/:counterId/nexttoken',loginRequired, dashboardController.nextToken_patch);
+router.post('/counter/create', loginRequired,createCounter,dashboardController.createCounter_post);
 
 module.exports = router;

@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
             }
             const { email } = payload
             // console.log(player)
-            Models.organization.findOne({where:{email:email}}).then(organizationData => {
+            Models.Admin.findOne({where:{email:email}}).then(organizationData => {
                 req.email = organizationData.email
                 next()
             }).catch((err) => {

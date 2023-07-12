@@ -5,11 +5,11 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 
 // Middleware
-const {userRegisterValidation,userLoginValidation} = require('../joiValidation/auth')
+const {adminRegisterationValidation,adminLoginValidation} = require('../joiValidation/auth')
 
 
 // User Login
-router.post('/login',userLoginValidation, authController.organizationLogin_post);
-router.post('/register', userRegisterValidation, authController.organizationRegister_post);
+router.post('/login',adminLoginValidation, authController.adminLogin_post);
+router.post('/register', adminRegisterationValidation, authController.adminRegister_post);
 
 module.exports = router;
