@@ -22,7 +22,7 @@ exports.adminLogin_post = async(req, res)=>{
             });
              delete admin.dataValues['password'];
              const data = admin.dataValues;
-            return res.status(200).json({success:true, JWT_TOKEN: accessToken, message:"You have successfully logged in",  admin:data})
+            return res.status(200).json({success:true, accesss_token: accessToken, message:"You have successfully logged in",  admin:data})
         }
         return res.status(401).json({success:false, message:"Incorrect email or password"})
     } catch (error) {

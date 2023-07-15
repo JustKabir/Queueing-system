@@ -1,6 +1,30 @@
 const Models = require('../database/models');
 const { Op } = require("sequelize");
 
+// default page details
+exports.dashboard_get = async(req,res)=>{
+    try {
+        // fetching Admin and its counter details
+        const dashboardData = await Models.Admin.findOne({
+            where:{email:req.email},
+            attributes:{
+                exclude:['password','createdAt','updatedAt','id']
+            },
+            include:[{
+                model: Models.Counter,
+                as:'counters',
+                attributes:{
+                    exclude:['gpsLocation','radius','image','adminId', 'updatedAt']
+                }
+            }]
+        });
+        return res.json({success:true, dashboardData:dashboardData,})
+ 
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({success:false,message:`Something went wrong, Please try again later`})
+    }
+}
 
 // Create counter
 exports.createCounter_post = async(req,res)=>{
@@ -35,8 +59,13 @@ exports.editDetails_patch = async(req, res)=>{
             where:{email:req.email},
             attributes:['id']
         })
+
+        // checking if the admin owns the counter
+        const check = await Models.Counter.findOne({where:{id:req.params.counterId, adminId:admin.id}});
+        if(!check)return res.status(400).json({success:false, message:"Invalid request"})
+
         // update it to the user
-        await Models.Counter.update(req.body, {where:{adminId:admin.id}});
+        await Models.Counter.update(req.body, {where:{adminId:admin.id, id:req.params.counterId}});
         return res.status(200).json({success:true, message:"You have successfully updated the details"})
     } catch (error) {
         console.log(error);
@@ -44,47 +73,89 @@ exports.editDetails_patch = async(req, res)=>{
     }
 }
 
-// default page details
-exports.dashboard_get = async(req,res)=>{
-    try {
-        let dashboardData = {};
 
-        // fetching Org details
-        const org = await Models.organization.findone({where:{email:req.email}});
+// Single Counter 
+exports.counter_get = async(req,res)=>{
+    try {
+        let counterData = {}
+
+        // fething admin and the counter
+        const admin = await Models.Admin.findOne({
+            where:{email:req.email},
+            attributes:{
+                exclude:['password','createdAt','updatedAt','id']
+            },
+            include:[{
+                model:Models.Counter,
+                as:'counters',
+                where:{id:req.params.counterId},
+                attributes:{
+                    exclude:['gpsLocation','radius','image','adminId', 'updatedAt']
+                }
+            }]
+        });
+
+        // checking if the admin wons the counter
+        if(!admin) return res.status(400).json({success:false, message:"Invalid API request"})
+
+        counterData = admin.counters[0].dataValues;
 
         //Queue length
         const queueLength = await Models.User.findOne({
             where:{
                 [Op.and]:[
-                {orgId:org.id},
+                {counterId:counterData.id},
                     {attended:false}
                 ]
             },
             order:[['createdAt', 'DESC']]
         });
 
-        dashboardData['queueLength']= queueLength.tokenNo;
+        if(queueLength) counterData['queueLength']= queueLength.tokenNo;
 
-        // current no
-       const currentNumber = await Models.User.findOne({
-        where:{
-            [Op.and]:[
-                {orgId:org.id},
-                {attended:true}
-            ]
-        },
-        order:[['createdAt', 'ASC']]
-       });
- 
-       dashboardData['currentNo'] = currentNumber;
- 
-       return res.status(200).json({success:true, data:dashboardData})
- 
+        return res.status(200).json({success:true, counterData:counterData})
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({success:false,message:`Something went wrong, Please try again later`})
     }
 }
+// Delete Counter 
+exports.counter_delete = async(req,res)=>{
+    try {
+        // check if the counter exists
+        // check if the admin owns the counter
+        // check if the counter is being used
+        // delete the counter
+        return res.status(200).json({success:true, })
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({success:false,message:`Something went wrong, Please try again later`})
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Next token button
 exports.nextToken_patch = async(req,res)=>{

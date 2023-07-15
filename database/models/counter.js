@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         as:'counters'
       })
       Counter.hasMany(models.User, {
-        foreignKey:'orgId',
+        foreignKey:'counterId',
         as: 'users'
       });
     }
