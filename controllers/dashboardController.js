@@ -44,7 +44,7 @@ exports.createCounter_post = async(req,res)=>{
             approxTimeInHours:req.body.approxTimeInHours,
             approxTimeInMinutes: req.body.approxTimeInMinutes
         })
-        return res.json({success:true})
+        return res.status(200).json({success:true, message:`${req.body.name} has been successfully created`})
     } catch (error) {
         console.log(error);
         return res.status(500).json({success: false, message:`Something went wrong, Please try again later`});
@@ -124,9 +124,41 @@ exports.counter_get = async(req,res)=>{
 exports.counter_delete = async(req,res)=>{
     try {
         // check if the counter exists
+        const counter = await Models.Counter.findOne({where:{id:params.counterId}});
+        if(!counter)return res.status(400).json({success:false, message:"Bad Method call"});
+        
         // check if the admin owns the counter
+        const adminAndCounter = await Models.Admin.findOne({
+            where:{email:req.email},
+            attributes:['id '],
+            include:[{
+                model:Models.Counter,
+                as:'counters',
+                where:{id:req.params.counterId},
+                attributes:{
+                    exclude:['gpsLocation','radius','image','adminId', 'updatedAt']
+                }
+            }]
+        });
+        if(!adminAndCounter)return res.status(400).json({success:false, message:"Bad Method call"});
+
         // check if the counter is being used
+        const user = await Models.User.findOne({
+            where:{
+                [Op.and]:[
+                {counterId:req.params.counterId},
+                {attended:false}
+                ]
+            },
+            order:[['createdAt', 'DESC']]
+        });
+
+        if(user){
+            await Models.User.update({deleted:true},{where:{counterId:req.params.id}});
+        }
+
         // delete the counter
+        await Models.Counter.destroy({where:{id:req.params.id}})
         return res.status(200).json({success:true, })
 
     } catch (error) {
@@ -136,48 +168,27 @@ exports.counter_delete = async(req,res)=>{
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Next token button
 exports.nextToken_patch = async(req,res)=>{
     try {
-        const org = await Models.organization.findOne({where:{email:req.email}});
+        const counter = await Models.Counter.findOne({where:{id:req.params.counterId}});
         
         // check currentTokenNo is the last no
         const lastTokenNo = await Models.User.findOne({
             where:{
                 [Op.and]:[
-                {orgId:org.id},
+                {counterId:req.params.counterId},
                     {attended:false}
                 ]
             },
             order:[['createdAt', 'DESC']]
         });
-        console.log(lastTokenNo)
-        if(lastTokenNo.tokenNo<org.currentTokenNo+1) return res.status(404).json({success:false, message:"The queue is empty"});
+        // console.log(lastTokenNo)
+        if(lastTokenNo.tokenNo<counter.currentTokenNo+1) return res.status(404).json({success:false, message:"The queue is empty"});
         
         // Updating the currentTokenNo
-        await Models.organization.update({currentTokenNo:org.currentTokenNo+1}, {where:{id:org.id}});
-        return res.status(200).json({success:true,nextTokenNo:lastTokenNo.tokenNo, message:`next token no is: ${org.currentTokenNo +1}`})
+        await Models.Counter.update({currentTokenNo:counter.currentTokenNo+1}, {where:{id:req.params.counterId}});
+        return res.status(200).json({success:true, nextTokenNo:lastTokenNo.tokenNo, message:`next token no is: ${counter.currentTokenNo +1}`})
     } catch (error) {
         console.error(error);
         return res.status(500).json({success:false,message:`Something went wrong, Please try again later`})
